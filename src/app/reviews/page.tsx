@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 
 import styles from './reviews.module.css'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ReviewsPage() {
 
 

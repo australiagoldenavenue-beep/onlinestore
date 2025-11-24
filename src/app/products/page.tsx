@@ -3,6 +3,8 @@ import ProductCard from "@/components/ProductCard"
 import styles from './products.module.css'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
     const { type } = await searchParams
 

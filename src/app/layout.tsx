@@ -28,11 +28,16 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   // Fetch background image URL from settings
-  const bgImageSetting = await prisma.settings.findUnique({
-    where: { key: 'backgroundImageUrl' }
-  })
+  let bgImageUrl = ''
+  try {
+    const bgImageSetting = await prisma.settings.findUnique({
+      where: { key: 'backgroundImageUrl' }
+    })
+    bgImageUrl = bgImageSetting?.value || ''
+  } catch (error) {
+    console.warn('Failed to fetch background image setting:', error)
+  }
 
-  const bgImageUrl = bgImageSetting?.value || ''
   const bgStyle = bgImageUrl ? `url(${bgImageUrl})` : undefined
 
   return (

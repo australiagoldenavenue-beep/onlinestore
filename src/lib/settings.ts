@@ -1,10 +1,16 @@
 import { prisma } from "@/lib/prisma"
 
 export async function getSettings() {
-    const settings = await prisma.settings.findMany()
-    const settingsMap: Record<string, string> = {}
-    settings.forEach(s => {
-        settingsMap[s.key] = s.value
-    })
-    return settingsMap
+    try {
+        const settings = await prisma.settings.findMany()
+        const settingsMap: Record<string, string> = {}
+        settings.forEach(s => {
+            settingsMap[s.key] = s.value
+        })
+        return settingsMap
+    } catch (error) {
+        // Return empty settings during build or if DB is inaccessible
+        console.warn('Failed to fetch settings:', error)
+        return {}
+    }
 }

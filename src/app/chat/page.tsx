@@ -4,6 +4,8 @@ import { getMessages } from "../actions/chat"
 import ChatInterface from "./ChatInterface"
 import styles from './page.module.css'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ChatPage() {
     const session = await auth()
 
