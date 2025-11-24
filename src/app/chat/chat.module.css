@@ -1,0 +1,124 @@
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.messagesContainer {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: #f9fafb;
+}
+
+.message {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.messageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.messageHeader strong {
+    color: #667eea;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.messageContent {
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.noMessages {
+    text-align: center;
+    color: #999;
+    padding: 3rem;
+    font-size: 1.1rem;
+}
+
+.messageForm {
+    padding: 1.5rem;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+}
+
+.error {
+    color: #ef4444;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.inputContainer {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.messageInput {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: none;
+    transition: border-color 0.2s ease;
+}
+
+.messageInput:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.sendButton {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.sendButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.sendButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .chatContainer {
+        height: 500px;
+    }
+
+    .inputContainer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sendButton {
+        width: 100%;
+    }
+}

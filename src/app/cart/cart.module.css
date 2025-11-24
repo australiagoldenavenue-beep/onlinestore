@@ -1,0 +1,107 @@
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 1rem;
+}
+
+.emptyCart {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #718096;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #edf2f7;
+    gap: 1rem;
+}
+
+.itemInfo h3 {
+    font-size: 1.1rem;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.itemPrice {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.removeButton {
+    color: #e53e3e;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.removeButton:hover {
+    background: #fff5f5;
+}
+
+.summary {
+    margin-top: 2rem;
+    background: #f7fafc;
+    padding: 2rem;
+    border-radius: 12px;
+}
+
+.noteInput {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.total {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    text-align: right;
+}
+
+.checkoutButton {
+    width: 100%;
+    padding: 1rem;
+    background: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+}
+
+.checkoutButton:hover {
+    background: #2c5282;
+}
+
+.checkoutButton:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    box-shadow: none;
+}
