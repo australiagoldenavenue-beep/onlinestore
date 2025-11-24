@@ -8,7 +8,7 @@ type Product = {
     name: string
 }
 
-export default function ReviewForm({ userId }: { userId: string }) {
+export default function ReviewForm() {
     const router = useRouter()
     const [products, setProducts] = useState<Product[]>([])
     const [selectedProduct, setSelectedProduct] = useState('')
@@ -62,7 +62,7 @@ export default function ReviewForm({ userId }: { userId: string }) {
             setContent('')
             setSelectedProduct('')
             router.refresh()
-        } catch (err) {
+        } catch {
             setError('Failed to submit review. Please try again.')
         } finally {
             setLoading(false)

@@ -1,29 +1,21 @@
 'use server'
-
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
-import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
-export async function getSettings() {
-    const settings = await prisma.settings.findMany()
-    const settingsMap: Record<string, string> = {}
-    settings.forEach(s => {
-        settingsMap[s.key] = s.value
-    })
-    console.log('Fetched Settings:', settingsMap)
-    return settingsMap
-}
+
 
 type FormState = { success?: boolean; message?: string; error?: string };
 
 export async function updateSettings(prevState: FormState | null, formData: FormData): Promise<FormState> {
     const session = await auth()
-    if (!session?.user || session.user.role !== 'ADMIN') {
-        redirect('/login')
+    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER' && session.user.role !== 'MANAGER')) {
+        return { error: 'Unauthorized' }
     }
 
-    const keys = ['ownerEmail', 'bankName', 'accountNumber', 'accountHolder', 'paymentInstructions', 'alertMessage', 'businessName', 'businessAddress', 'openingHours']
+    console.log('Updating settings with data:', Object.fromEntries(formData))
+
+    const keys = ['ownerEmail', 'bankName', 'accountNumber', 'accountHolder', 'paymentInstructions', 'alertMessage', 'businessName', 'businessAddress', 'openingHours', 'backgroundImageUrl']
 
     try {
         for (const key of keys) {
@@ -41,7 +33,7 @@ export async function updateSettings(prevState: FormState | null, formData: Form
         revalidatePath('/admin/settings')
         revalidatePath('/')
         return { success: true, message: 'Settings updated successfully' }
-    } catch (error) {
+    } catch {
         return { error: 'Failed to update settings' }
     }
 }

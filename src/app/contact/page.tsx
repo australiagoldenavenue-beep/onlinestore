@@ -1,14 +1,8 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { getSettings } from '@/app/actions/settings'
+import { getSettings } from '@/lib/settings'
 import styles from './contact.module.css'
 
-export default function ContactPage() {
-    const [settings, setSettings] = useState<Record<string, string>>({})
-
-    useEffect(() => {
-        getSettings().then(setSettings)
-    }, [])
+export default async function ContactPage() {
+    const settings = await getSettings()
 
     return (
         <div className={styles.container}>
@@ -37,11 +31,23 @@ export default function ContactPage() {
                 </div>
 
                 <div className={styles.mapContainer}>
-                    <div className={styles.mapPlaceholder}>
-                        <span className={styles.mapIcon}>🗺️</span>
-                        <p>Map View</p>
-                        <p className={styles.mapAddress}>{settings.businessAddress}</p>
-                    </div>
+                    {settings.businessAddress ? (
+                        <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.businessAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                        ></iframe>
+                    ) : (
+                        <div className={styles.mapPlaceholder}>
+                            <span className={styles.mapIcon}>🗺️</span>
+                            <p>Map View</p>
+                            <p className={styles.mapAddress}>Address not available</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

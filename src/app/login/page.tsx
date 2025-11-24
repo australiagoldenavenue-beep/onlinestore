@@ -16,11 +16,11 @@ export default function LoginPage() {
                     {state?.error && <p className={styles.error}>{state.error}</p>}
                     <div className={styles.formGroup}>
                         <label htmlFor="email" className={styles.label}>Email</label>
-                        <input type="email" id="email" name="email" required className={styles.input} />
+                        <input type="email" id="email" name="email" required className={styles.input} autoComplete="email" />
                     </div>
                     <div className={styles.formGroup}>
                         <label htmlFor="password" className={styles.label}>Password</label>
-                        <input type="password" id="password" name="password" required className={styles.input} />
+                        <input type="password" id="password" name="password" required className={styles.input} autoComplete="current-password" />
                     </div>
                     <button type="submit" className={styles.button} disabled={isPending}>
                         {isPending ? 'Logging in…' : 'Login'}

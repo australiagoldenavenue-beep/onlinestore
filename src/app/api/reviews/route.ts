@@ -50,7 +50,8 @@ export async function GET() {
             },
             orderBy: {
                 createdAt: 'desc'
-            }
+            },
+            take: 50 // Limit to prevent memory crash
         })
 
         return NextResponse.json(reviews)

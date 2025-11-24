@@ -1,0 +1,176 @@
+// PostgreSQL version of Prisma schema
+// Use this when switching from SQLite to PostgreSQL
+// Instructions: Replace the content of schema.prisma with this file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  password    String
+  name        String?
+  address     String?
+  phoneNumber String?
+  role        String    @default("USER") // "USER", "ADMIN", "STAFF", "MANAGER"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orders      Order[]
+  comments    Comment[]
+  chats       Chat[]
+  messages    Message[]
+  staffProfile StaffProfile?
+}
+
+model StaffProfile {
+  id              String          @id @default(cuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hourlyRate      Float           @default(0)
+  
+  // Contact Information
+  phoneNumber     String?
+  address         String?
+  
+  // Employment Information
+  tfn             String?         // Tax File Number
+  bankAccount     String?         // Bank account details
+  
+  // Visa/Passport Information
+  passportNumber  String?
+  visaType        String?
+  
+  schedules       StaffSchedule[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model StaffSchedule {
+  id             String       @id @default(cuid())
+  staffProfileId String
+  staffProfile   StaffProfile @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+  dayOfWeek      Int          // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime      String       // Format "HH:mm"
+  endTime        String       // Format "HH:mm"
+  isEnabled      Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([staffProfileId, dayOfWeek])
+}
+
+model Product {
+  id             String       @id @default(cuid())
+  name           String
+  description    String
+  price          Float
+  stock          Int
+  imageUrl       String?
+  isOutOfStock   Boolean      @default(false)
+  outOfStockNote String?
+  typeId         String?
+  type           ProductType? @relation(fields: [typeId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  orderItems     OrderItem[]
+  comments       Comment[]
+}
+
+model ProductType {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  imageUrl  String?
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  status    String      @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  orderType String      @default("ONLINE") // ONLINE, OFFLINE
+  total     Float
+  note      String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float   // Price at the time of purchase
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  title     String?
+  isCommunity Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model FinanceRecord {
+  id          String   @id @default(cuid())
+  amount      Float
+  type        String   @default("INCOME") // INCOME, EXPENSE
+  category    String?  // e.g., "Manual Entry", "Order Adjustment"
+  description String?
+  orderCount  Int      @default(0)
+  gstRate     Float    @default(0.1) // 0 or 0.1
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

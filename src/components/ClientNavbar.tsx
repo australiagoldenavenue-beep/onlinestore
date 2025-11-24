@@ -1,19 +1,21 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+
 import styles from './Navbar.module.css'
 
+import { Session } from 'next-auth'
+
 type NavbarProps = {
-    session: any
+    session: Session | null
     businessName: string
-    logoutAction: any
+    logoutAction: () => Promise<void>
 }
 
 export default function ClientNavbar({ session, businessName, logoutAction }: NavbarProps) {
     const [isVisible, setIsVisible] = useState(true)
     const [lastScrollY, setLastScrollY] = useState(0)
-    const pathname = usePathname()
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -47,13 +49,16 @@ export default function ClientNavbar({ session, businessName, logoutAction }: Na
 
                     {session ? (
                         <>
-                            <Link href="/chat" className={styles.link}>Chat</Link>
-                            <Link href="/profile" className={styles.link}>Review</Link>
-                            {session.user?.role === 'ADMIN' && (
-                                <Link href="/admin" className={styles.link}>Admin</Link>
+                            <Link href="/cart" className={styles.link}>Cart</Link>
+                            <Link href="/chat" className={styles.link}>Community</Link>
+                            <Link href="/orders" className={styles.link}>Order History</Link>
+                            {(session.user?.role === 'ADMIN' || session.user?.role === 'OWNER' || session.user?.role === 'MANAGER') && (
+                                <Link href="/admin" className={styles.link}>{session.user?.name || 'Admin'}</Link>
                             )}
                             <div className={styles.userMenu}>
-                                <Link href="/profile" className={styles.userName}>👤 {session.user?.name || 'User'}</Link>
+                                {!(session.user?.role === 'ADMIN' || session.user?.role === 'OWNER' || session.user?.role === 'MANAGER') && (
+                                    <Link href="/profile" className={styles.userName}>👤 {session.user?.name || 'User'}</Link>
+                                )}
                                 <form action={logoutAction} className={styles.logoutForm}>
                                     <button type="submit" className={styles.logoutButton}>
                                         Logout
@@ -63,7 +68,6 @@ export default function ClientNavbar({ session, businessName, logoutAction }: Na
                         </>
                     ) : (
                         <>
-                            <Link href="/review" className={styles.link}>Review</Link>
                             <Link href="/contact" className={styles.link}>Contact Us</Link>
                             <Link href="/policy" className={styles.link}>Policy</Link>
                             <Link href="/login" className={styles.loginButton}>Login</Link>

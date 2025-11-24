@@ -1,6 +1,5 @@
 'use server'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Providers from '@/components/Providers';
+
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
@@ -14,9 +13,10 @@ const RegisterSchema = z.object({
     phoneNumber: z.string().min(1),
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function sendMessage(prevState: any, formData: FormData) {
+
+
+
+export async function register(prevState: unknown, formData: FormData) {
     const validatedFields = RegisterSchema.safeParse({
         email: formData.get('email'),
         password: formData.get('password'),
@@ -41,8 +41,6 @@ export async function sendMessage(prevState: any, formData: FormData) {
             return { error: "Email already in use" }
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const session = await auth()
         const hashedPassword = await bcrypt.hash(password, 10)
 
         await prisma.user.create({
@@ -55,7 +53,7 @@ export async function sendMessage(prevState: any, formData: FormData) {
                 role: 'USER', // Default role
             },
         })
-    } catch (error) {
+    } catch {
         return { error: "Something went wrong" }
     }
 
@@ -65,8 +63,9 @@ export async function sendMessage(prevState: any, formData: FormData) {
 import { signIn, signOut } from "@/auth"
 import { AuthError } from "next-auth"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function authenticate(prevState: any, formData: FormData) {
+
+
+export async function authenticate(prevState: unknown, formData: FormData) {
     try {
         await signIn('credentials', {
             ...Object.fromEntries(formData),
@@ -85,7 +84,7 @@ export async function authenticate(prevState: any, formData: FormData) {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function Navbar() {
+
+export async function logout() {
     await signOut()
 }

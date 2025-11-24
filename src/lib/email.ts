@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 import { prisma } from './prisma'
-import { getSettings } from '@/app/actions/settings'
+import { getSettings } from '@/lib/settings'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 'test_key')
 
@@ -182,11 +182,24 @@ export async function sendDailySummary() {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
+    // Get aggregate stats for today
+    const stats = await prisma.order.aggregate({
+      where: {
+        createdAt: { gte: today }
+      },
+      _sum: { total: true },
+      _count: { id: true }
+    })
+
+    if (stats._count.id === 0) {
+      console.log('No orders today, skipping daily summary')
+      return
+    }
+
+    // Get recent orders for the list (limit to 50 to prevent memory issues)
     const orders = await prisma.order.findMany({
       where: {
-        createdAt: {
-          gte: today
-        }
+        createdAt: { gte: today }
       },
       include: {
         user: true,
@@ -196,15 +209,13 @@ export async function sendDailySummary() {
       },
       orderBy: {
         createdAt: 'desc'
-      }
+      },
+      take: 50
     })
 
-    if (orders.length === 0) {
-      console.log('No orders today, skipping daily summary')
-      return
-    }
+    const totalRevenue = stats._sum.total || 0
+    const totalOrders = stats._count.id
 
-    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0)
 
     const ordersHtml = orders.map(order => `
       <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px;">
@@ -229,11 +240,11 @@ export async function sendDailySummary() {
         
         <div style="background: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h2 style="margin-top: 0;">Summary</h2>
-          <p><strong>Total Orders:</strong> ${orders.length}</p>
+          <p><strong>Total Orders:</strong> ${totalOrders}</p>
           <p><strong>Total Revenue:</strong> $${totalRevenue.toFixed(2)}</p>
         </div>
 
-        <h2>Orders</h2>
+        <h2>Orders ${totalOrders > 50 ? '(Showing last 50)' : ''}</h2>
         ${ordersHtml}
 
         <p style="margin-top: 30px; color: #666;">This is your automated daily order summary.</p>

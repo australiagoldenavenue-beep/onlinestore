@@ -24,9 +24,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('cart')
-            if (saved) {
-                try {
+            try {
+                const saved = localStorage.getItem('cart')
+                if (saved) {
                     const parsed = JSON.parse(saved)
                     if (Array.isArray(parsed)) {
                         setItems(parsed)
@@ -34,11 +34,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                         console.error('Cart data is not an array:', parsed)
                         setItems([])
                     }
-                } catch (e) {
-                    console.error('Failed to parse cart data:', e)
-                    setItems([])
                 }
+            } catch (e) {
+                console.error('Failed to load cart data:', e)
+                setItems([])
+            } finally {
+                setIsLoaded(true)
             }
+        } else {
             setIsLoaded(true)
         }
     }, [])

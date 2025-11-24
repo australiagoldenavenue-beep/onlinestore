@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getSettings } from '@/app/actions/settings'
+import { getSettings } from '@/lib/settings'
 
 export default async function Footer() {
     const settings = await getSettings()

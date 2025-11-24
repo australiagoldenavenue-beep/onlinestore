@@ -7,6 +7,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className={styles.card}>
             <div className={styles.imageContainer}>
                 {product.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={product.imageUrl} alt={product.name} className={styles.image} />
                 ) : (
                     <div className={styles.noImage}>

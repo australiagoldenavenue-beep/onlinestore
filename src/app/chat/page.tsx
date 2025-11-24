@@ -12,7 +12,7 @@ export default async function ChatPage() {
     }
 
     const messages = await getMessages()
-    const serializedMessages = messages.map(m => ({
+    const serializedMessages = messages.map((m) => ({
         ...m,
         createdAt: m.createdAt.toISOString()
     }))

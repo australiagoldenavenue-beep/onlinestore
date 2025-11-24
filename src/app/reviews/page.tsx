@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/auth'
-import ReviewForm from './ReviewForm'
+
+
 import styles from './reviews.module.css'
 
 export default async function ReviewsPage() {
-    const session = await auth()
+
 
     // Get all reviews with user and product information
     const reviews = await prisma.comment.findMany({
@@ -24,7 +24,8 @@ export default async function ReviewsPage() {
         },
         orderBy: {
             createdAt: 'desc'
-        }
+        },
+        take: 50 // Limit to prevent memory crash
     })
 
     return (
@@ -33,12 +34,7 @@ export default async function ReviewsPage() {
                 <h1 className={styles.title}>Customer Reviews</h1>
                 <p className={styles.subtitle}>See what our customers are saying about our products</p>
             </div>
-            {session && (
-                <div className={styles.formSection}>
-                    <h2>Share Your Experience</h2>
-                    <ReviewForm userId={session.user.id} />
-                </div>
-            )}
+
 
 
             <div className={styles.reviewsGrid}>
@@ -52,6 +48,7 @@ export default async function ReviewsPage() {
                             <div className={styles.reviewHeader}>
                                 <div className={styles.productInfo}>
                                     {review.product.imageUrl && (
+                                        // eslint-disable-next-line @next/next/no-img-element
                                         <img
                                             src={review.product.imageUrl}
                                             alt={review.product.name}

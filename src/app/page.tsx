@@ -1,6 +1,6 @@
 import Link from "next/link"
 import styles from './page.module.css'
-import { getSettings } from "@/app/actions/settings"
+import { getSettings } from "@/lib/settings"
 
 export default async function Home() {
   const settings = await getSettings()

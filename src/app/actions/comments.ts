@@ -8,7 +8,7 @@ const CommentSchema = z.object({
     content: z.string().min(1),
 })
 
-export async function addComment(productId: string, prevState: any, formData: FormData) {
+export async function addComment(productId: string, prevState: unknown, formData: FormData) {
     const session = await auth()
     if (!session?.user) return { error: "Not logged in" }
 
@@ -30,4 +30,17 @@ export async function addComment(productId: string, prevState: any, formData: Fo
 
     revalidatePath(`/products/${productId}`)
     return { success: true }
+}
+
+export async function deleteComment(commentId: string, productId: string) {
+    const session = await auth()
+    if (!session?.user || (session.user.role !== 'OWNER' && session.user.role !== 'MANAGER')) {
+        throw new Error('Unauthorized')
+    }
+
+    await prisma.comment.delete({
+        where: { id: commentId }
+    })
+
+    revalidatePath(`/products/${productId}`)
 }

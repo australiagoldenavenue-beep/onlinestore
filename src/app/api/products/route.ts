@@ -10,7 +10,8 @@ export async function GET() {
             },
             orderBy: {
                 name: 'asc'
-            }
+            },
+            take: 50 // Limit to prevent memory crash
         })
 
         return NextResponse.json(products)

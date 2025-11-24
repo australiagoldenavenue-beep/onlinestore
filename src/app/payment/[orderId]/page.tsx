@@ -1,30 +1,83 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { processPayment } from '@/app/actions/payment'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/components/Navbar'
+import styles from './payment.module.css'
 
-export default function PaymentPage({ params }: { params: { orderId: string } }) {
+export default function PaymentPage({ params }: { params: Promise<{ orderId: string }> }) {
+    const { orderId } = use(params)
     const router = useRouter()
     const [isProcessing, setIsProcessing] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
+    const [countdown, setCountdown] = useState(5)
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank'>('card')
+    const [settings, setSettings] = useState<Record<string, string>>({})
+    const [orderTotal, setOrderTotal] = useState(0)
 
     // Card state
     const [cardNumber, setCardNumber] = useState('')
+    const [cardType, setCardType] = useState('')
     const [expiry, setExpiry] = useState('')
     const [cvc, setCvc] = useState('')
     const [name, setName] = useState('')
 
+    // Fetch settings and order info
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const [settingsRes, orderRes] = await Promise.all([
+                    fetch('/api/settings'),
+                    fetch(`/api/orders/${orderId}`)
+                ])
+
+                if (settingsRes.ok) {
+                    const data = await settingsRes.json()
+                    setSettings(data)
+                }
+
+                if (orderRes.ok) {
+                    const orderData = await orderRes.json()
+                    setOrderTotal(orderData.total)
+                }
+            } catch (err) {
+                console.error('Failed to fetch data:', err)
+            }
+        }
+        fetchData()
+    }, [orderId])
+
     useEffect(() => {
         if (success) {
-            const timer = setTimeout(() => {
-                router.push('/profile') // Redirect to order history (profile usually has orders)
-            }, 5000)
-            return () => clearTimeout(timer)
+            const timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer)
+                        router.push('/profile')
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
+            return () => clearInterval(timer)
         }
     }, [success, router])
+
+    const detectCardType = (number: string) => {
+        const cleanNumber = number.replace(/\D/g, '')
+        if (cleanNumber.match(/^4/)) return 'Visa'
+        if (cleanNumber.match(/^5[1-5]/)) return 'Mastercard'
+        if (cleanNumber.match(/^3[47]/)) return 'Amex'
+        if (cleanNumber.match(/^6(?:011|5)/)) return 'Discover'
+        return ''
+    }
+
+    const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value
+        setCardNumber(val)
+        setCardType(detectCardType(val))
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -32,7 +85,7 @@ export default function PaymentPage({ params }: { params: { orderId: string } })
         setError('')
 
         try {
-            const result = await processPayment(params.orderId, {
+            const result = await processPayment(orderId, {
                 cardNumber,
                 expiry,
                 cvc,
@@ -44,7 +97,7 @@ export default function PaymentPage({ params }: { params: { orderId: string } })
             } else {
                 setError(result.error || 'Payment failed')
             }
-        } catch (err) {
+        } catch {
             setError('An unexpected error occurred')
         } finally {
             setIsProcessing(false)
@@ -54,34 +107,22 @@ export default function PaymentPage({ params }: { params: { orderId: string } })
     if (success) {
         return (
             <>
-                <Navbar />
-                <div style={{
-                    minHeight: '80vh',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    padding: '2rem'
-                }}>
-                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✅</div>
-                    <h1 style={{ color: 'green', marginBottom: '1rem' }}>Payment Successful!</h1>
-                    <p style={{ fontSize: '1.2rem', color: '#666' }}>Thank you for your purchase.</p>
-                    <p style={{ marginTop: '2rem', color: '#888' }}>Redirecting to your orders in 5 seconds...</p>
-                    <button
-                        onClick={() => router.push('/profile')}
-                        style={{
-                            marginTop: '2rem',
-                            padding: '0.75rem 1.5rem',
-                            background: '#0070f3',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Go to Orders Now
-                    </button>
+
+                <div className={styles.container}>
+                    <div className={styles.card}>
+                        <div className={styles.successContainer}>
+                            <div className={styles.successIcon}>✅</div>
+                            <h1 className={styles.successTitle}>Payment Successful!</h1>
+                            <p className={styles.successText}>Thank you for your purchase.</p>
+                            <p className={styles.redirectText}>Redirecting to your orders in {countdown} seconds...</p>
+                            <button
+                                onClick={() => router.push('/profile')}
+                                className={styles.orderButton}
+                            >
+                                Go to Orders Now
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </>
         )
@@ -89,88 +130,158 @@ export default function PaymentPage({ params }: { params: { orderId: string } })
 
     return (
         <>
-            <Navbar />
-            <div style={{ maxWidth: '500px', margin: '2rem auto', padding: '2rem', background: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                <h1 style={{ marginBottom: '2rem', textAlign: 'center' }}>Secure Payment</h1>
 
-                {error && (
-                    <div style={{ background: '#ffebee', color: '#c62828', padding: '1rem', borderRadius: '4px', marginBottom: '1.5rem', textAlign: 'center' }}>
-                        {error}
-                    </div>
-                )}
+            <div className={styles.container}>
+                <div className={styles.card}>
+                    <h1 className={styles.title}>Secure Payment</h1>
+                    <p style={{ textAlign: 'center', color: '#666', marginBottom: '1.5rem' }}>
+                        Order ID: <strong>{orderId}</strong>
+                    </p>
 
-                <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>Cardholder Name</label>
-                        <input
-                            type="text"
-                            required
-                            placeholder="John Doe"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #ddd', fontSize: '1rem' }}
-                        />
-                    </div>
-
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>Card Number</label>
-                        <input
-                            type="text"
-                            required
-                            placeholder="0000 0000 0000 0000"
-                            maxLength={19}
-                            value={cardNumber}
-                            onChange={e => setCardNumber(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #ddd', fontSize: '1rem' }}
-                        />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>Expiry Date</label>
-                            <input
-                                type="text"
-                                required
-                                placeholder="MM/YY"
-                                maxLength={5}
-                                value={expiry}
-                                onChange={e => setExpiry(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #ddd', fontSize: '1rem' }}
-                            />
+                    {error && (
+                        <div className={styles.error}>
+                            {error}
                         </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>CVC</label>
-                            <input
-                                type="text"
-                                required
-                                placeholder="123"
-                                maxLength={4}
-                                value={cvc}
-                                onChange={e => setCvc(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #ddd', fontSize: '1rem' }}
-                            />
-                        </div>
+                    )}
+
+                    {/* Payment Method Tabs */}
+                    <div className={styles.paymentTabs}>
+                        <button
+                            type="button"
+                            className={`${styles.tab} ${paymentMethod === 'card' ? styles.activeTab : ''}`}
+                            onClick={() => setPaymentMethod('card')}
+                        >
+                            💳 Card Payment
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.tab} ${paymentMethod === 'bank' ? styles.activeTab : ''}`}
+                            onClick={() => setPaymentMethod('bank')}
+                        >
+                            🏦 Bank Transfer
+                        </button>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={isProcessing}
-                        style={{
-                            width: '100%',
-                            padding: '1rem',
-                            background: isProcessing ? '#ccc' : '#0070f3',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '1.1rem',
-                            fontWeight: '600',
-                            cursor: isProcessing ? 'not-allowed' : 'pointer',
-                            transition: 'background 0.2s'
-                        }}
-                    >
-                        {isProcessing ? 'Processing Payment...' : 'Pay Now'}
-                    </button>
-                </form>
+                    {/* Card Payment Form */}
+                    {paymentMethod === 'card' && (
+                        <form onSubmit={handleSubmit}>
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>Cardholder Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="John Doe"
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                    className={styles.input}
+                                />
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>
+                                    Card Number
+                                    {cardType && <span className={styles.cardTypeBadge}>{cardType}</span>}
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="0000 0000 0000 0000"
+                                    maxLength={19}
+                                    value={cardNumber}
+                                    onChange={handleCardNumberChange}
+                                    className={styles.input}
+                                />
+                            </div>
+
+                            <div className={styles.row}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Expiry Date</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="MM/YY"
+                                        maxLength={5}
+                                        value={expiry}
+                                        onChange={e => setExpiry(e.target.value)}
+                                        className={styles.input}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>CVC</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="123"
+                                        maxLength={4}
+                                        value={cvc}
+                                        onChange={e => setCvc(e.target.value)}
+                                        className={styles.input}
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isProcessing}
+                                className={styles.payButton}
+                            >
+                                {isProcessing ? 'Processing Payment...' : 'Pay Now'}
+                            </button>
+                        </form>
+                    )}
+
+                    {/* Bank Transfer Information */}
+                    {paymentMethod === 'bank' && (
+                        <div className={styles.bankTransferSection}>
+                            <div className={styles.bankInfoCard}>
+                                <h3 className={styles.bankInfoTitle}>📋 Bank Account Details</h3>
+
+                                <div className={styles.infoRow}>
+                                    <span className={styles.infoLabel}>Bank Name:</span>
+                                    <span className={styles.infoValue}>{settings.bankName || 'Not configured'}</span>
+                                </div>
+
+                                <div className={styles.infoRow}>
+                                    <span className={styles.infoLabel}>Account Number:</span>
+                                    <span className={styles.infoValue}>{settings.accountNumber || 'Not configured'}</span>
+                                </div>
+
+                                <div className={styles.infoRow}>
+                                    <span className={styles.infoLabel}>Account Holder:</span>
+                                    <span className={styles.infoValue}>{settings.accountHolder || 'Not configured'}</span>
+                                </div>
+
+                                <div className={styles.infoRow}>
+                                    <span className={styles.infoLabel}>Amount to Transfer:</span>
+                                    <span className={styles.infoValueHighlight}>${orderTotal.toFixed(2)}</span>
+                                </div>
+
+                                <div className={styles.infoRow}>
+                                    <span className={styles.infoLabel}>Reference (Order ID):</span>
+                                    <span className={styles.infoValueHighlight}>{orderId}</span>
+                                </div>
+                            </div>
+
+                            {settings.paymentInstructions && (
+                                <div className={styles.instructionsCard}>
+                                    <h3 className={styles.instructionsTitle}>📝 Payment Instructions</h3>
+                                    <p className={styles.instructionsText}>{settings.paymentInstructions}</p>
+                                </div>
+                            )}
+
+                            <div className={styles.warningCard}>
+                                <p>⚠️ <strong>Important:</strong> Please include your Order ID <strong>{orderId}</strong> in the payment reference to ensure your order is processed correctly.</p>
+                            </div>
+
+                            <button
+                                onClick={() => router.push('/profile')}
+                                className={styles.returnButton}
+                            >
+                                Return to My Orders
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </>
     )

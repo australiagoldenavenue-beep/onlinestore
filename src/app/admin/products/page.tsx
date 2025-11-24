@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/prisma"
 import ProductForm from "./ProductForm"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminProductsPage() {
     const products = await prisma.product.findMany({
         orderBy: { createdAt: 'desc' },
-        include: { type: true }
+        include: { type: true },
+        take: 50 // Limit to prevent memory crash
     })
     const types = await prisma.productType.findMany()
 

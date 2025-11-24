@@ -3,7 +3,8 @@
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
-export async function processPayment(orderId: string, paymentDetails: any) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function processPayment(orderId: string, _paymentDetails: unknown) {
     try {
         // Simulate payment processing delay
         await new Promise(resolve => setTimeout(resolve, 2000))
@@ -15,7 +16,7 @@ export async function processPayment(orderId: string, paymentDetails: any) {
         if (isSuccess) {
             await prisma.order.update({
                 where: { id: orderId },
-                data: { status: 'COMPLETED' } // Or 'PAID'
+                data: { status: 'PAID' }
             })
 
             revalidatePath(`/payment/${orderId}`)

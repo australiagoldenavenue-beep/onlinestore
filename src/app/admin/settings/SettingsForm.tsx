@@ -14,6 +14,12 @@ export default function SettingsForm({ settings }: { settings: Record<string, st
             {state?.error && <p style={{ color: 'red' }}>{state.error}</p>}
 
             <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1rem' }}>
+                {/* Business Information Section */}
+                <div style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '0.5rem' }}>
+                    <h3 style={{ color: '#2d3748', fontSize: '1.2rem', marginBottom: '0.5rem' }}>📋 Business Information</h3>
+                    <small style={{ color: '#718096' }}>Displayed on your website and in customer communications</small>
+                </div>
+
                 <div>
                     <label htmlFor="businessName" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
                         Business Name
@@ -69,6 +75,12 @@ export default function SettingsForm({ settings }: { settings: Record<string, st
                     />
                 </div>
 
+                {/* Payment Account Section */}
+                <div style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '0.5rem', marginTop: '1rem' }}>
+                    <h3 style={{ color: '#2d3748', fontSize: '1.2rem', marginBottom: '0.5rem' }}>💳 Payment Account Details</h3>
+                    <small style={{ color: '#718096' }}>⚠️ <strong>Customer-facing:</strong> These details will be shown to customers on the payment page</small>
+                </div>
+
                 <div>
                     <label htmlFor="bankName" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
                         Bank Name
@@ -109,6 +121,12 @@ export default function SettingsForm({ settings }: { settings: Record<string, st
                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
                         required
                     />
+                </div>
+
+                {/* Website Customization Section */}
+                <div style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '0.5rem', marginTop: '1rem' }}>
+                    <h3 style={{ color: '#2d3748', fontSize: '1.2rem', marginBottom: '0.5rem' }}>🎨 Website Customization</h3>
+                    <small style={{ color: '#718096' }}>Customize the look and messaging of your storefront</small>
                 </div>
 
                 <div>

@@ -19,7 +19,7 @@ export default function ProductForm({ types }: { types: ProductType[] }) {
                 <textarea name="description" placeholder="Description" required style={{ padding: '0.5rem' }} />
                 <input name="price" type="number" step="0.01" placeholder="Price" required style={{ padding: '0.5rem' }} />
                 <input name="stock" type="number" placeholder="Stock" required style={{ padding: '0.5rem' }} />
-                <input name="imageUrl" placeholder="Image URL" style={{ padding: '0.5rem' }} />
+                <input name="image" type="file" accept="image/*" style={{ padding: '0.5rem' }} />
 
                 <select name="typeId" style={{ padding: '0.5rem' }}>
                     <option value="">Select Type</option>

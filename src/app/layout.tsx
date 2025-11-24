@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-import Providers from "@/components/Providers";
+
 import { initializeCron } from "@/lib/cron";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,7 +19,7 @@ if (typeof window === 'undefined') {
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { CartProvider } from "@/context/CartContext";
+import Providers from "@/components/Providers";
 import { prisma } from "@/lib/prisma";
 
 export default async function RootLayout({
@@ -43,14 +43,15 @@ export default async function RootLayout({
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...(bgStyle && { '--bg-image': bgStyle } as any)
         }}
       >
-        <CartProvider>
+        <Providers>
           <Navbar />
           {children}
           <Footer />
-        </CartProvider>
+        </Providers>
       </body>
     </html>
   )

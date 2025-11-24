@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { logout } from '@/app/actions/auth'
-import { getSettings } from '@/app/actions/settings'
+import { getSettings } from '@/lib/settings'
 import ClientNavbar from './ClientNavbar'
 
 export default async function Navbar() {

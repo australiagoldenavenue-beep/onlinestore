@@ -1,65 +1,119 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
     // Create Product Types
-    const electronics = await prisma.productType.upsert({
-        where: { name: 'Electronics' },
+    const drink = await prisma.productType.upsert({
+        where: { name: 'Drink' },
         update: {},
-        create: { name: 'Electronics' },
+        create: { name: 'Drink' },
     })
 
-    const clothing = await prisma.productType.upsert({
-        where: { name: 'Clothing' },
+    const food = await prisma.productType.upsert({
+        where: { name: 'Food' },
         update: {},
-        create: { name: 'Clothing' },
+        create: { name: 'Food' },
+    })
+
+    const snack = await prisma.productType.upsert({
+        where: { name: 'Snack' },
+        update: {},
+        create: { name: 'Snack' },
     })
 
     // Create Sample Products
     await prisma.product.create({
         data: {
-            name: 'Wireless Headphones',
-            description: 'High-quality noise cancelling headphones.',
-            price: 199.99,
-            stock: 50,
-            imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D',
-            typeId: electronics.id,
-        },
-    })
-
-    await prisma.product.create({
-        data: {
-            name: 'Smart Watch',
-            description: 'Track your fitness and notifications.',
-            price: 299.99,
-            stock: 30,
-            imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHByb2R1Y3R8ZW58MHx8MHx8fDA%3D',
-            typeId: electronics.id,
-        },
-    })
-
-    await prisma.product.create({
-        data: {
-            name: 'Classic T-Shirt',
-            description: 'Comfortable cotton t-shirt.',
-            price: 29.99,
+            name: 'Coca Cola',
+            description: 'Refreshing cola drink.',
+            price: 1.99,
             stock: 100,
-            imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dCUyMHNoaXJ0fGVufDB8fDB8fHww',
-            typeId: clothing.id,
+            imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&auto=format&fit=crop&q=60',
+            typeId: drink.id,
         },
     })
 
     await prisma.product.create({
         data: {
-            name: 'Running Shoes',
-            description: 'Lightweight shoes for running.',
-            price: 89.99,
+            name: 'Mineral Water',
+            description: 'Pure mineral water.',
+            price: 0.99,
+            stock: 200,
+            imageUrl: 'https://images.unsplash.com/photo-1560023907-5f339617ea30?w=500&auto=format&fit=crop&q=60',
+            typeId: drink.id,
+        },
+    })
+
+    await prisma.product.create({
+        data: {
+            name: 'Beef Steak',
+            description: 'Premium cut beef steak.',
+            price: 25.99,
+            stock: 20,
+            imageUrl: 'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&auto=format&fit=crop&q=60',
+            typeId: food.id,
+        },
+    })
+
+    await prisma.product.create({
+        data: {
+            name: 'Pork Chops',
+            description: 'Juicy pork chops.',
+            price: 15.99,
+            stock: 30,
+            imageUrl: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=500&auto=format&fit=crop&q=60',
+            typeId: food.id,
+        },
+    })
+
+    await prisma.product.create({
+        data: {
+            name: 'Potato Chips',
+            description: 'Crispy potato chips.',
+            price: 2.99,
+            stock: 50,
+            imageUrl: 'https://images.unsplash.com/photo-1566478919030-26174450f271?w=500&auto=format&fit=crop&q=60',
+            typeId: snack.id,
+        },
+    })
+
+    await prisma.product.create({
+        data: {
+            name: 'Chocolate Bar',
+            description: 'Delicious milk chocolate.',
+            price: 1.49,
             stock: 0,
-            imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvZXN8ZW58MHx8MHx8fDA%3D',
-            typeId: clothing.id,
+            imageUrl: 'https://images.unsplash.com/photo-1511381939415-e44015466834?w=500&auto=format&fit=crop&q=60',
+            typeId: snack.id,
             isOutOfStock: true,
-            outOfStockNote: 'New stock arriving next week!',
+            outOfStockNote: 'Restocking soon!',
+        },
+    })
+    // Create Users
+    const passwordHash = await bcrypt.hash('admin123', 10)
+    const userPasswordHash = await bcrypt.hash('test123', 10)
+
+    await prisma.user.upsert({
+        where: { email: 'admin@example.com' },
+        update: { role: 'ADMIN', password: passwordHash },
+        create: {
+            email: 'admin@example.com',
+            name: 'Admin User',
+            password: passwordHash,
+            role: 'ADMIN',
+        },
+    })
+
+    await prisma.user.upsert({
+        where: { email: 'test@example.com' },
+        update: { role: 'USER', password: userPasswordHash },
+        create: {
+            email: 'test@example.com',
+            name: 'Test User',
+            password: userPasswordHash,
+            role: 'USER',
         },
     })
 }
