@@ -12,6 +12,11 @@
 **Solution**: Removed `publish = ".next"` from netlify.toml and installed @netlify/plugin-nextjs
 **Status**: ✅ Resolved in commit d629c09
 
+### Problem 3: Node Version Incompatibility (FIXED ✅)
+**Error**: Netlify using Node 22, Prisma compatibility issues
+**Solution**: Pinned Node to version 20 in netlify.toml and package.json
+**Status**: ✅ Resolved in commit 24cc38f
+
 ---
 
 ## Current Netlify Configuration
@@ -21,8 +26,20 @@
 [build]
   command = "prisma generate && npm run build"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+```
+
+### package.json (engines)
+```json
+{
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
 ```
 
 **What this does**:
