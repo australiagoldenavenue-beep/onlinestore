@@ -31,6 +31,13 @@
 - Added `DATABASE_URL = "file:./prisma/dev.db"` to netlify.toml build env
 **Status**: ✅ Resolved in commit b904ca5
 
+### Problem 6: Prisma in Middleware (FIXED ✅)
+**Error**: "Usage of unsupported C++ Addon(s) found in Node.js Middleware"
+**Solution**: 
+- Split `auth.ts` into `auth.config.ts` (Edge-safe) and `auth.ts` (Node-only)
+- Updated `middleware.ts` to use `auth.config.ts` (no Prisma)
+**Status**: ✅ Resolved in commit af81ebb
+
 ---
 
 ## Current Netlify Configuration
