@@ -24,6 +24,13 @@
 - Added `force-dynamic` to `products`, `reviews`, and `chat` pages
 **Status**: ✅ Resolved in commit e2f381b
 
+### Problem 5: Publish Directory & Build-time DB (FIXED ✅)
+**Error**: "Publish directory cannot be base directory" & Prisma env missing
+**Solution**: 
+- Set `publish = ".next"` in netlify.toml
+- Added `DATABASE_URL = "file:./prisma/dev.db"` to netlify.toml build env
+**Status**: ✅ Resolved in commit b904ca5
+
 ---
 
 ## Current Netlify Configuration
@@ -32,9 +39,11 @@
 ```toml
 [build]
   command = "prisma generate && npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
+  DATABASE_URL = "file:./prisma/dev.db"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
