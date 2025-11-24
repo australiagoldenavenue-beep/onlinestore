@@ -17,6 +17,13 @@
 **Solution**: Pinned Node to version 20 in netlify.toml and package.json
 **Status**: ✅ Resolved in commit 24cc38f
 
+### Problem 4: Prerender Errors on Layout/Not-Found (FIXED ✅)
+**Error**: `prisma.settings.findUnique` failing during static generation of `/_not-found`
+**Solution**: 
+- Wrapped global settings fetch in try-catch in `src/lib/settings.ts` and `src/app/layout.tsx`
+- Added `force-dynamic` to `products`, `reviews`, and `chat` pages
+**Status**: ✅ Resolved in commit e2f381b
+
 ---
 
 ## Current Netlify Configuration
