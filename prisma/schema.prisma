@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,18 +9,50 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  password    String
-  name        String?
-  address     String?
-  phoneNumber String?
-  role        String    @default("USER") // "USER" or "ADMIN"
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  orders      Order[]
-  comments    Comment[]
-  chats       Chat[]
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String?
+  address      String?
+  phoneNumber  String?
+  role         String        @default("USER")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  chats        Chat[]
+  comments     Comment[]
+  messages     Message[]
+  orders       Order[]
+  staffProfile StaffProfile?
+}
+
+model StaffProfile {
+  id             String          @id @default(cuid())
+  userId         String          @unique
+  hourlyRate     Float           @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  address        String?
+  bankAccount    String?
+  passportNumber String?
+  phoneNumber    String?
+  tfn            String?
+  visaType       String?
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules      StaffSchedule[]
+}
+
+model StaffSchedule {
+  id             String       @id @default(cuid())
+  staffProfileId String
+  dayOfWeek      Int
+  startTime      String
+  endTime        String
+  isEnabled      Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  staffProfile   StaffProfile @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([staffProfileId, dayOfWeek])
 }
 
 model Product {
@@ -35,51 +65,53 @@ model Product {
   isOutOfStock   Boolean      @default(false)
   outOfStockNote String?
   typeId         String?
-  type           ProductType? @relation(fields: [typeId], references: [id])
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  orderItems     OrderItem[]
   comments       Comment[]
+  orderItems     OrderItem[]
+  type           ProductType? @relation(fields: [typeId], references: [id])
 }
 
 model ProductType {
   id        String    @id @default(cuid())
   name      String    @unique
-  products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  imageUrl  String?
+  products  Product[]
 }
 
 model Order {
   id        String      @id @default(cuid())
   userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  status    String      @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  status    String      @default("PENDING")
+  orderType String      @default("ONLINE")
   total     Float
   note      String?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
   items     OrderItem[]
 }
 
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Float   // Price at the time of purchase
+  price     Float
+  product   Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
 }
 
 model Comment {
   id        String   @id @default(cuid())
   content   String
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Settings {
@@ -91,23 +123,24 @@ model Settings {
 }
 
 model Chat {
-  id        String    @id @default(cuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  title     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  messages  Message[]
+  id          String    @id @default(cuid())
+  userId      String
+  title       String?
+  isCommunity Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+  messages    Message[]
 }
-
 
 model Message {
   id        String   @id @default(cuid())
   chatId    String
-  chat      Chat     @relation(fields: [chatId], references: [id])
   userId    String
   content   String
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  chat      Chat     @relation(fields: [chatId], references: [id])
 }
 
 model VerificationCode {
@@ -116,4 +149,17 @@ model VerificationCode {
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model FinanceRecord {
+  id          String   @id @default(cuid())
+  amount      Float
+  type        String   @default("INCOME")
+  category    String?
+  description String?
+  orderCount  Int      @default(0)
+  gstRate     Float    @default(0.1)
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
