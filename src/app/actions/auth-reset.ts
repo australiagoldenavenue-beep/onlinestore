@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma"
 import { sendVerificationCode } from "@/lib/email"
 import bcrypt from "bcryptjs"
-import { redirect } from "next/navigation"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function requestPasswordReset(prevState: any, formData: FormData) {
@@ -16,26 +15,38 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
     try {
         const user = await prisma.user.findUnique({ where: { email } })
 
-        // Always return success to prevent email enumeration, but only send if user exists
         if (user) {
             // Generate 6 digit code
             const code = Math.floor(100000 + Math.random() * 900000).toString()
             const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
 
-            // Save code
-            await prisma.verificationCode.create({
-                data: {
+            // Save code (overwrite existing if present)
+            await prisma.verificationCode.upsert({
+                where: { email },
+                update: {
+                    code,
+                    expiresAt,
+                },
+                create: {
                     email,
                     code,
-                    expiresAt
+                    expiresAt,
                 }
             })
+
+            // Log code for testing (REMOVE IN PRODUCTION)
+            console.log(`Verification code for ${email}: ${code}`)
 
             // Send email
             await sendVerificationCode(email, code)
         }
 
-        return { success: true, message: "If an account exists with this email, a verification code has been sent." }
+        // Always return the same response to avoid leaking which emails exist
+        return {
+            success: true,
+            message: "If an account exists with this email, a verification code has been sent.",
+            email,
+        }
     } catch (error) {
         console.error("Reset password error:", error)
         return { error: "Something went wrong. Please try again." }
@@ -79,10 +90,10 @@ export async function verifyAndResetPassword(prevState: any, formData: FormData)
             where: { email }
         })
 
+        return { success: true }
+
     } catch (error) {
         console.error("Verify reset error:", error)
         return { error: "Failed to reset password" }
     }
-
-    redirect('/login?reset=success')
 }

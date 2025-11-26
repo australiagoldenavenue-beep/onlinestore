@@ -57,7 +57,7 @@ export async function register(prevState: unknown, formData: FormData) {
         return { error: "Something went wrong" }
     }
 
-    redirect('/login')
+    redirect('/signin')
 }
 
 import { signIn, signOut } from "@/auth"

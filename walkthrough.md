@@ -52,6 +52,9 @@ I have successfully built the Online Store system with a backend admin panel and
 - **Database**: Schema pushed and client generated.
 
 ## Next Steps
-- **Image Upload**: Currently using image URLs. Implement file upload (e.g., Uploadthing or S3).
 - **Payment Integration**: Integrate Stripe or PayPal for real payments.
-- **Email Notifications**: Send emails on order confirmation.
+
+## Completed Features (Recent)
+- **Email Notifications**: Emails sent on order confirmation and to admin.
+- **Bank Transfer Enhancements**: Added payment proof upload and QR code for bank transfer orders.
+- **Admin Dashboard**: Added view for payment proofs in Order details.

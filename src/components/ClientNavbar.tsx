@@ -70,7 +70,7 @@ export default function ClientNavbar({ session, businessName, logoutAction }: Na
                         <>
                             <Link href="/contact" className={styles.link}>Contact Us</Link>
                             <Link href="/policy" className={styles.link}>Policy</Link>
-                            <Link href="/login" className={styles.loginButton}>Login</Link>
+                            <Link href="/signin" className={styles.loginButton}>Login</Link>
                         </>
                     )}
                 </div>

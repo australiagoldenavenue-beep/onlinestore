@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useEffect, useActionState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { addComment } from '@/app/actions/comments'
 import styles from './orders.module.css'
 
@@ -28,7 +28,7 @@ function SubmitButton() {
 
 export default function ReviewModal({ productId, productName, isOpen, onClose }: ReviewModalProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [state, formAction] = useFormState(addComment.bind(null, productId) as any, initialState)
+    const [state, formAction] = useActionState(addComment.bind(null, productId) as any, initialState)
 
     useEffect(() => {
         if (state?.success) {

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "check_admin.js",
+    "check_products.js",
+    "reset_admin.js",
   ]),
 ]);
 

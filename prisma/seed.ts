@@ -116,6 +116,30 @@ async function main() {
             role: 'USER',
         },
     })
+
+    const ownerPasswordHash = await bcrypt.hash('owner123', 10)
+    await prisma.user.upsert({
+        where: { email: 'owner@example.com' },
+        update: { role: 'OWNER', password: ownerPasswordHash },
+        create: {
+            email: 'owner@example.com',
+            name: 'Owner User',
+            password: ownerPasswordHash,
+            role: 'OWNER',
+        },
+    })
+
+    const managerPasswordHash = await bcrypt.hash('manager123', 10)
+    await prisma.user.upsert({
+        where: { email: 'manager@example.com' },
+        update: { role: 'MANAGER', password: managerPasswordHash },
+        create: {
+            email: 'manager@example.com',
+            name: 'Manager User',
+            password: managerPasswordHash,
+            role: 'MANAGER',
+        },
+    })
 }
 
 main()

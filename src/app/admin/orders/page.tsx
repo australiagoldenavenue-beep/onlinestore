@@ -243,6 +243,26 @@ function OrderCard({ order }: { order: OrderWithRelations }) {
                 </div>
             )}
 
+            {order.paymentProofUrl && (
+                <div style={{
+                    marginBottom: '1rem',
+                    padding: '0.75rem',
+                    background: '#e8f4f8',
+                    borderRadius: '6px',
+                    borderLeft: '3px solid #2196f3'
+                }}>
+                    <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.25rem' }}>Payment Proof:</div>
+                    <a
+                        href={order.paymentProofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#0070f3', textDecoration: 'underline', fontWeight: 'bold' }}
+                    >
+                        View Receipt Image ↗
+                    </a>
+                </div>
+            )}
+
             <div style={{ marginBottom: '1rem' }}>
                 <div style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#666' }}>
                     Order Items:

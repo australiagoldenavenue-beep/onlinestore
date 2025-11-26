@@ -41,7 +41,7 @@ export default async function RootLayout({
   const bgStyle = bgImageUrl ? `url(${bgImageUrl})` : undefined
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={inter.className}
         style={{

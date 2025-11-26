@@ -44,6 +44,18 @@ The payment page (`/payment/[orderId]`) now features:
 4. **Return Button**:
    - Quick navigation back to "My Orders" page
 
+
+### 3. Payment Proof Upload
+Customers can now upload a screenshot of their payment receipt directly on the payment page.
+- **Upload Interface**: Simple file picker in the Bank Transfer tab.
+- **Storage**: Files are saved locally to `public/uploads` (can be configured for S3).
+- **Order Update**: Order is updated with the proof URL.
+
+### 4. QR Code Payment
+A QR code is automatically generated containing the bank details and order reference.
+- **Format**: Contains Bank Name, Account Number, Holder, Amount, and Reference.
+- **Usage**: Customers can scan this with their banking app (if supported) or for easy reference.
+
 ## User Flow
 
 ### For Business Owners:
@@ -71,6 +83,7 @@ The payment page (`/payment/[orderId]`) now features:
    - Read payment instructions
    - Make bank transfer manually
    - Include Order ID in reference
+   - **Upload Payment Proof**: Upload a screenshot of the transfer receipt
 6. After payment, admin manually updates order status
 
 ## Technical Implementation
@@ -84,12 +97,17 @@ The payment page (`/payment/[orderId]`) now features:
    - GET endpoint to fetch specific order details
    - Returns order total and items
 
+3. **`/src/app/api/upload/route.ts`**
+   - POST endpoint for file uploads
+   - Saves files to `public/uploads`
+
 ### Modified Files:
 1. **`/src/app/payment/[orderId]/page.tsx`**
    - Added payment method state (`card` | `bank`)
    - Added settings and order data fetching
    - Created tabbed interface
    - Added bank transfer information display
+   - **Added file upload UI**
 
 2. **`/src/app/payment/[orderId]/payment.module.css`**
    - Added tab styles with active state
@@ -107,6 +125,9 @@ The payment page (`/payment/[orderId]`) now features:
      - 💳 Payment Account Details (with customer-facing warning)
      - 🎨 Website Customization
    - Improved form organization
+
+5. **`prisma/schema.prisma`**
+   - Added `paymentMethod` and `paymentProofUrl` to Order model
 
 ## Security & Privacy Considerations
 
@@ -128,9 +149,10 @@ The system does **not** expose:
 
 When a customer chooses bank transfer:
 1. Customer makes transfer manually to provided account
-2. Admin checks bank account for incoming transfers
-3. Admin matches Order ID from transfer reference
-4. Admin updates order status in **Admin → Orders**:
+2. Customer uploads payment proof (optional but recommended)
+3. Admin checks bank account for incoming transfers
+4. Admin matches Order ID from transfer reference
+5. Admin updates order status in **Admin → Orders**:
    - `PENDING` → `PAID` (after confirming transfer)
    - `PAID` → `PROCESSED` (after fulfilling order)
 
@@ -157,6 +179,7 @@ To hide the bank transfer option, simply don't fill in the bank account fields i
 4. **Owner Control**: Business owner can update bank details anytime
 5. **Professional**: Modern, tabbed interface with clear information hierarchy
 6. **User-Friendly**: All payment info displayed clearly on one page
+7. **Verification**: Payment proof upload helps admins verify payments faster
 
 ## Testing Checklist
 
@@ -170,17 +193,17 @@ To hide the bank transfer option, simply don't fill in the bank account fields i
 - [ ] Verify payment instructions appear
 - [ ] Test "Return to My Orders" button
 - [ ] Update bank details and verify changes reflect on payment page
+- [ ] **Test file upload for payment proof**
 
 ## Future Enhancements (Optional)
 
-- Payment confirmation upload (receipt image)
 - Automatic order status update via banking API integration
 - Multiple bank account support (different currencies)
 - QR code generation for bank transfer details
-- Email notification with payment details sent to customer
+- Email notification with payment details sent to customer (Implemented)
 
 ---
 
 **Feature Status**: ✅ Complete and Ready for Production
-**Version**: 1.0
-**Last Updated**: 2025-11-24
+**Version**: 1.1
+**Last Updated**: 2025-11-26

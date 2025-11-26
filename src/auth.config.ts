@@ -2,7 +2,7 @@ import type { NextAuthConfig } from "next-auth"
 
 export const authConfig = {
     pages: {
-        signIn: '/login',
+        signIn: '/signin',
     },
     callbacks: {
         async jwt({ token, user }) {
@@ -23,6 +23,22 @@ export const authConfig = {
             }
             return session;
         },
+    },
+    session: {
+        strategy: "jwt",
+        maxAge: 24 * 60 * 60, // 1 day (JWT expiry)
+    },
+    cookies: {
+        sessionToken: {
+            name: `next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: undefined, // Session cookie
+            }
+        }
     },
     providers: [], // Configured in auth.ts
 } satisfies NextAuthConfig

@@ -2,7 +2,9 @@ import { Resend } from 'resend'
 import { prisma } from './prisma'
 import { getSettings } from '@/lib/settings'
 
-const resend = new Resend(process.env.RESEND_API_KEY || 'test_key')
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+
 
 export async function sendOrderConfirmation(orderId: string) {
   try {
@@ -266,28 +268,71 @@ export async function sendDailySummary() {
 
 export async function sendVerificationCode(email: string, code: string) {
   try {
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #333;">Password Reset Verification</h1>
-        <p>You requested to reset your password. Use the code below to verify your account:</p>
-        
-        <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-          <span style="font-size: 24px; font-weight: bold; letter-spacing: 5px;">${code}</span>
-        </div>
+    const baseUrl = process.env.AUTH_URL || 'http://127.0.0.1:3000'
+    const link = `${baseUrl}/forgot-password/verify?email=${encodeURIComponent(email)}&code=${code}`
 
-        <p>If you didn't request this, please ignore this email.</p>
-        <p>This code will expire in 15 minutes.</p>
-      </div>
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Reset Your Password</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; color: #18181b; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+          .container { max-width: 480px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #e4e4e7; }
+          .header { padding: 40px 40px 0 40px; text-align: center; }
+          .logo { font-size: 24px; font-weight: 800; color: #000000; text-decoration: none; letter-spacing: -0.5px; }
+          .content { padding: 40px; }
+          .title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #000000; text-align: center; }
+          .text { font-size: 16px; line-height: 1.6; color: #52525b; margin-bottom: 24px; text-align: center; }
+          .code-box { background-color: #f4f4f5; border-radius: 12px; padding: 20px; text-align: center; margin: 32px 0; letter-spacing: 8px; font-size: 32px; font-weight: 700; color: #000000; border: 1px solid #e4e4e7; font-family: 'SF Mono', 'Roboto Mono', monospace; }
+          .button { display: block; width: 100%; background-color: #000000; color: #ffffff; text-decoration: none; padding: 16px 0; border-radius: 12px; font-weight: 600; font-size: 16px; text-align: center; transition: opacity 0.2s; }
+          .button:hover { opacity: 0.9; }
+          .footer { padding: 32px; text-align: center; font-size: 12px; color: #a1a1aa; background-color: #fafafa; border-top: 1px solid #f4f4f5; }
+          .link { color: #000000; text-decoration: underline; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">Universa</div>
+          </div>
+          <div class="content">
+            <h1 class="title">Reset your password</h1>
+            <p class="text">We received a request to reset the password for your account. Enter the following code to continue:</p>
+            
+            <div class="code-box">${code}</div>
+            
+            <p class="text">Or click the button below:</p>
+            
+            <a href="${link}" class="button">Reset Password</a>
+            
+            <p style="margin-top: 32px; font-size: 14px; color: #71717a; text-align: center;">
+              This code will expire in 15 minutes. If you didn't request this, you can safely ignore this email.
+            </p>
+          </div>
+          <div class="footer">
+            &copy; ${new Date().getFullYear()} Universa. All rights reserved.
+          </div>
+        </div>
+      </body>
+      </html>
     `
 
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: email,
-      subject: 'Password Reset Verification Code',
+      subject: 'Reset Your Password',
       html,
     })
 
-    console.log(`Verification code sent to ${email}`)
+    if (result.error) {
+      console.error('Resend API Error:', result.error)
+      throw new Error(`Failed to send email: ${result.error.message}`)
+    }
+
+    console.log(`Verification code sent to ${email}. ID: ${result.data?.id}`)
   } catch (error) {
     console.error('Failed to send verification code:', error)
     throw new Error('Failed to send verification email')
