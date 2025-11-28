@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -42,3 +43,15 @@ next-env.d.ts
 
 # uploads
 /public/uploads
+
+# Local Netlify folder
+.netlify
+
+# SQLite databases (for local development only)
+*.db
+*.db-journal
+
+# Test and utility scripts
+test-email.ts
+verify_password.ts
+get_product_id.ts

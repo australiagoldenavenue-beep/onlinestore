@@ -2,7 +2,10 @@ import { Resend } from 'resend'
 import { prisma } from './prisma'
 import { getSettings } from '@/lib/settings'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null
+
 
 
 
@@ -74,11 +77,21 @@ export async function sendOrderConfirmation(orderId: string) {
 
         <p>If you have any questions, please don't hesitate to contact us.</p>
         <p>Thank you for your business!</p>
+        
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #888; font-size: 12px;">
+          <p>This is an automated message, please do not reply.</p>
+          &copy; ${new Date().getFullYear()} Universa. All rights reserved.
+        </div>
       </div>
     `
 
+    if (!resend) {
+      console.warn('Resend API key missing, skipping order confirmation email')
+      return
+    }
+
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      from: `Universa <${process.env.RESEND_FROM_EMAIL || 'noreply@universa.com.au'}>`,
       to: order.user.email,
       subject: `Order Confirmation - #${order.id.substring(0, 8)}`,
       html,
@@ -157,8 +170,13 @@ export async function sendOrderNotification(orderId: string) {
       </div>
     `
 
+    if (!resend) {
+      console.warn('Resend API key missing, skipping order notification email')
+      return
+    }
+
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      from: `Universa <${process.env.RESEND_FROM_EMAIL || 'noreply@universa.com.au'}>`,
       to: ownerEmail,
       subject: `New Order - #${order.id.substring(0, 8)}`,
       html,
@@ -253,8 +271,13 @@ export async function sendDailySummary() {
       </div>
     `
 
+    if (!resend) {
+      console.warn('Resend API key missing, skipping daily summary email')
+      return
+    }
+
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      from: `Universa <${process.env.RESEND_FROM_EMAIL || 'noreply@universa.com.au'}>`,
       to: ownerEmail,
       subject: `Daily Order Summary - ${new Date().toLocaleDateString()}`,
       html,
@@ -313,6 +336,8 @@ export async function sendVerificationCode(email: string, code: string) {
             </p>
           </div>
           <div class="footer">
+            <p style="margin-bottom: 10px;">No reply required.</p>
+            <p style="margin-bottom: 10px;">universa.com.au send this verify code</p>
             &copy; ${new Date().getFullYear()} Universa. All rights reserved.
           </div>
         </div>
@@ -320,8 +345,12 @@ export async function sendVerificationCode(email: string, code: string) {
       </html>
     `
 
+    if (!resend) {
+      throw new Error('Resend API key is missing')
+    }
+
     const result = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      from: `Universa <${process.env.RESEND_FROM_EMAIL || 'noreply@universa.com.au'}>`,
       to: email,
       subject: 'Reset Your Password',
       html,

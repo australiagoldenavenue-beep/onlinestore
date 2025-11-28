@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "check_admin.js",
     "check_products.js",
     "reset_admin.js",
+    ".netlify/**",
   ]),
 ]);
 

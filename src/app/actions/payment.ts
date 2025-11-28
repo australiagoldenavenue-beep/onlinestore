@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     apiVersion: '2024-11-20.acacia' as any // Cast to any to avoid type issues if version mismatch
 })
 

@@ -8,25 +8,27 @@ import { redirect } from "next/navigation"
 const RegisterSchema = z.object({
     email: z.string().email(),
     password: z.string().min(6),
+    confirmPassword: z.string().min(6),
     name: z.string().min(1),
     address: z.string().min(1),
     phoneNumber: z.string().min(1),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
 })
-
-
-
 
 export async function register(prevState: unknown, formData: FormData) {
     const validatedFields = RegisterSchema.safeParse({
         email: formData.get('email'),
         password: formData.get('password'),
+        confirmPassword: formData.get('confirmPassword'),
         name: formData.get('name'),
         address: formData.get('address'),
         phoneNumber: formData.get('phoneNumber'),
     })
 
     if (!validatedFields.success) {
-        return { error: "Invalid fields" }
+        return { error: validatedFields.error.flatten().fieldErrors.confirmPassword?.[0] || "Invalid fields" }
     }
 
     const { email, password, name, address, phoneNumber } = validatedFields.data
@@ -86,5 +88,5 @@ export async function authenticate(prevState: unknown, formData: FormData) {
 
 
 export async function logout() {
-    await signOut()
+    await signOut({ redirectTo: '/' })
 }

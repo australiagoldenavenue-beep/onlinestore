@@ -5,6 +5,7 @@ import AddToCartButton from "./AddToCartButton"
 import styles from './product.module.css'
 import CommentForm from "./CommentForm"
 import { deleteComment } from "@/app/actions/comments"
+import Link from "next/link"
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +72,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                     <CommentForm productId={product.id} />
                 ) : (
                     <div className={styles.loginPrompt}>
-                        <p>Please <a href="/login">log in</a> to leave a review.</p>
+                        <p>Please <Link href={`/signin?callbackUrl=/products/${product.id}`} className={styles.loginLink}>log in</Link> to leave a review.</p>
                     </div>
                 )}
 
