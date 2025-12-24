@@ -118,7 +118,8 @@ Add these environment variables in your hosting platform dashboard:
 ### Required Environment Variables:
 
 ```env
-DATABASE_URL="postgresql://user:password@host:5432/database?schema=public"
+DATABASE_URL="postgresql://user:password@host:6543/database?pgbouncer=true"
+DIRECT_URL="postgresql://user:password@host:5432/database"
 NEXTAUTH_URL="https://yourdomain.com"
 NEXTAUTH_SECRET="your-generated-secret-from-step-2"
 STRIPE_SECRET_KEY="sk_live_your_stripe_secret_key"
