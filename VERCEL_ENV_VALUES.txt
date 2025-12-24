@@ -1,0 +1,7 @@
+DATABASE_URL="postgresql://postgres.siufhcsqvhheoameqsxp:Jyzgg23o@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://postgres.siufhcsqvhheoameqsxp:Jyzgg23o@aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
+NEXTAUTH_SECRET="ZvuGeGB2ZMGZgCeAFdpRRHq9lOxGFbkpbG3AL+08IGQ="
+NEXT_PUBLIC_SUPABASE_URL="https://siufhcsqvhheoameqsxp.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_Q3G3RUL2OQzhGVgPLKgMKA_FJx-UJrQ"
+RESEND_API_KEY="re_LEMxU7o3_HoqvFANQHmHECx5AMQNXNhXT"
+NEXTAUTH_URL="https://universa.com.au"
