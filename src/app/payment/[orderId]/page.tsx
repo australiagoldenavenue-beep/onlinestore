@@ -47,23 +47,10 @@ function PaymentForm({ orderId, amount, onSuccess }: { orderId: string, amount: 
 
             if (stripeError) {
                 setError(stripeError.message || 'Payment failed')
-            } else if (!paymentIntent) {
-                setError('No response from payment processor. Please try again.')
             } else if (paymentIntent.status === 'succeeded') {
                 // Step 3: Update order in database
-                const confirmation = await confirmPayment(orderId, paymentIntent.id)
-                if (confirmation?.error) {
-                    setError(confirmation.error)
-                    return
-                }
+                await confirmPayment(orderId, paymentIntent.id)
                 onSuccess()
-            } else {
-                const statusMessage: Record<string, string> = {
-                    requires_action: 'Additional card authentication is required. Please complete the verification prompt and try again.',
-                    processing: 'Your payment is still processing. We will email you once it completes.',
-                    requires_payment_method: 'Your card was declined. Please use a different payment method.',
-                }
-                setError(statusMessage[paymentIntent.status] || `Payment status: ${paymentIntent.status}. Please contact support if this continues.`)
             }
         } catch (err) {
             console.error(err)
@@ -117,7 +104,6 @@ export default function PaymentPage({ params }: { params: Promise<{ orderId: str
     const [settings, setSettings] = useState<Record<string, string>>({})
     const [orderTotal, setOrderTotal] = useState(0)
     const [uploading, setUploading] = useState(false)
-    const [proofStatus, setProofStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
 
     // Fetch settings and order info
     useEffect(() => {
@@ -294,7 +280,6 @@ export default function PaymentPage({ params }: { params: Promise<{ orderId: str
                                     }
 
                                     setUploading(true)
-                                    setProofStatus(null)
                                     const formData = new FormData()
                                     formData.append('file', file)
 
@@ -310,22 +295,13 @@ export default function PaymentPage({ params }: { params: Promise<{ orderId: str
 
                                         const result = await updatePaymentProof(orderId, data.url)
                                         if (result.success) {
-                                            setProofStatus({
-                                                type: 'success',
-                                                message: 'Payment proof uploaded. Our team will verify and update your order status shortly.'
-                                            })
+                                            setSuccess(true)
                                         } else {
-                                            setProofStatus({
-                                                type: 'error',
-                                                message: result.error || 'Failed to update order with payment proof.'
-                                            })
+                                            alert('Failed to update order with payment proof')
                                         }
                                     } catch (error) {
                                         console.error(error)
-                                        setProofStatus({
-                                            type: 'error',
-                                            message: 'Error uploading file. Please try again.'
-                                        })
+                                        alert('Error uploading file')
                                     } finally {
                                         setUploading(false)
                                     }
@@ -334,17 +310,6 @@ export default function PaymentPage({ params }: { params: Promise<{ orderId: str
                                 style={{ display: 'block', width: '100%', marginBottom: '10px' }}
                             />
                             {uploading && <p style={{ color: '#0070f3' }}>Uploading...</p>}
-                            {proofStatus && (
-                                <p style={{
-                                    color: proofStatus.type === 'success' ? '#047857' : '#b91c1c',
-                                    background: proofStatus.type === 'success' ? '#ecfdf5' : '#fef2f2',
-                                    border: `1px solid ${proofStatus.type === 'success' ? '#34d399' : '#fecaca'}`,
-                                    padding: '10px',
-                                    borderRadius: '8px'
-                                }}>
-                                    {proofStatus.message}
-                                </p>
-                            )}
                         </div>
 
                         <button

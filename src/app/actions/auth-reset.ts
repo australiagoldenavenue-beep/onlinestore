@@ -15,38 +15,31 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
     try {
         const user = await prisma.user.findUnique({ where: { email } })
 
-        if (user) {
-            // Generate 6 digit code
-            const code = Math.floor(100000 + Math.random() * 900000).toString()
-            const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
-
-            // Save code (overwrite existing if present)
-            await prisma.verificationCode.upsert({
-                where: { email },
-                update: {
-                    code,
-                    expiresAt,
-                },
-                create: {
-                    email,
-                    code,
-                    expiresAt,
-                }
-            })
-
-            // Log code for testing (REMOVE IN PRODUCTION)
-            console.log(`Verification code for ${email}: ${code}`)
-
-            // Send email
-            await sendVerificationCode(email, code)
+        // Check if user exists
+        if (!user) {
+            return { error: "This email is not registered. Please sign up for a new account." }
         }
 
-        // Always return the same response to avoid leaking which emails exist
-        return {
-            success: true,
-            message: "If an account exists with this email, a verification code has been sent.",
-            email,
-        }
+        // Generate 6 digit code
+        const code = Math.floor(100000 + Math.random() * 900000).toString()
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
+
+        // Save code
+        await prisma.verificationCode.create({
+            data: {
+                email,
+                code,
+                expiresAt
+            }
+        })
+
+        // Log code for testing (REMOVE IN PRODUCTION)
+        console.log(`Verification code for ${email}: ${code}`)
+
+        // Send email
+        await sendVerificationCode(email, code)
+
+        return { success: true, message: "A verification code has been sent to your email.", email }
     } catch (error) {
         console.error("Reset password error:", error)
         return { error: "Something went wrong. Please try again." }
